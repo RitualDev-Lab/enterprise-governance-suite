@@ -1,0 +1,115 @@
+global:
+  environment: "production"
+  companyName: "Enterprise Global Corp"
+  airGapped: false # When true, enables strict air-gap NetworkPolicies and local LLM routing only
+
+# ─── 1. DBShield (Database Guardrail & Wire Proxy) ──────────────────────
+dbshield:
+  enabled: true
+  replicaCount: 3
+  image:
+    repository: ghcr.io/ritualdev-lab/dbshield
+    tag: "0.2.0"
+    pullPolicy: IfNotPresent
+  safetyTier: "STRICT"
+  maxRowsPerMutation: 25
+  allowDestructiveDDL: false
+  enablePiiMasking: true
+  enableCostGate: true
+  maxEstimatedCost: 10000
+  upstream:
+    host: "aurora-postgres.internal.vpc"
+    port: 5432
+  sso:
+    enabled: true
+    provider: "okta" # okta | azure-ad | google | ping-identity
+    issuer: "https://enterprise.okta.com"
+    clientId: "dbshield_sso_client_id"
+    allowedDomains:
+      - "enterprise.com"
+    allowedRoles:
+      - "dba"
+      - "security-engineer"
+      - "lead-developer"
+  chatOps:
+    enabled: true
+    slackWebhookUrl: "https://hooks.slack.com/services/xxx/yyy/zzz"
+    slackChannel: "#db-staging-approvals"
+    notifyOnPending: true
+    notifyOnDecision: true
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+
+# ─── 2. AgentShield (Runtime Kernel Sandbox & Fleet Control Plane) ─────
+agentshield:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ghcr.io/ritualdev-lab/agentshield
+    tag: "0.1.4"
+    pullPolicy: IfNotPresent
+  port: 8443
+  organizationId: "enterprise-fleet-core"
+  complianceFrameworks:
+    - "soc2"
+    - "iso27001"
+  egressPolicy:
+    denyMetadata: true # Deny 169.254.169.254
+    denyLoopback: true
+    allowLocalLlm: true # Allow Ollama / vLLM
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
+# ─── 3. SkillPrism (Shared Redis Token Cache & Embedding Registry) ─────
+skillprism:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ghcr.io/ritualdev-lab/skillprism
+    tag: "0.2.0"
+    pullPolicy: IfNotPresent
+  port: 8080
+  sharedCache: true
+  cacheTtlDays: 30
+  redisUrl: "redis://:vault_password@redis.internal.vpc:6379/0"
+  resources:
+    limits:
+      cpu: 1500m
+      memory: 2Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+
+# ─── Ingress & Corporate TLS ───────────────────────────────────────────
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: governance.ai.enterprise.com
+      paths:
+        - path: /
+          service: dbshield-dashboard
+          port: 3100
+        - path: /api/fleet
+          service: agentshield-control-plane
+          port: 8443
+        - path: /api/tools
+          service: skillprism-hub
+          port: 8080
+  tls:
+    - secretName: ritual-governance-tls
+      hosts:
+        - governance.ai.enterprise.com

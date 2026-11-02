@@ -1,0 +1,69 @@
+{{- if .Values.dbshield.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ritual-governance.fullname" . }}-dbshield
+  labels:
+    app.kubernetes.io/name: dbshield
+    app.kubernetes.io/component: wire-proxy
+    {{- include "ritual-governance.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.dbshield.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dbshield
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dbshield
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        fsGroup: 65532
+      containers:
+        - name: dbshield
+          image: "{{ .Values.dbshield.image.repository }}:{{ .Values.dbshield.image.tag }}"
+          imagePullPolicy: {{ .Values.dbshield.image.pullPolicy }}
+          command: ["/nodejs/bin/node", "dist/cli.js"]
+          args:
+            - "proxy"
+            - "--port"
+            - "5433"
+            - "--upstream-host"
+            - {{ .Values.dbshield.upstream.host | quote }}
+            - "--upstream-port"
+            - {{ .Values.dbshield.upstream.port | quote }}
+            - "--tier"
+            - {{ .Values.dbshield.safetyTier | quote }}
+          ports:
+            - name: wire-proxy
+              containerPort: 5433
+            - name: dashboard
+              containerPort: 3100
+            - name: metrics
+              containerPort: 9090
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: DBSHIELD_AIR_GAPPED
+              value: {{ .Values.global.airGapped | quote }}
+            - name: DBSHIELD_SAFETY_TIER
+              value: {{ .Values.dbshield.safetyTier | quote }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: metrics
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.dbshield.resources | nindent 12 }}
+{{- end }}

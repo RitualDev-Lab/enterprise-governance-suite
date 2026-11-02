@@ -1,0 +1,27 @@
+{{- if .Values.dbshield.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ritual-governance.fullname" . }}-dbshield
+  labels:
+    app.kubernetes.io/name: dbshield
+    {{- include "ritual-governance.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5433
+      targetPort: wire-proxy
+      protocol: TCP
+      name: wire-proxy
+    - port: 3100
+      targetPort: dashboard
+      protocol: TCP
+      name: dashboard
+    - port: 9090
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+  selector:
+    app.kubernetes.io/name: dbshield
+    app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}

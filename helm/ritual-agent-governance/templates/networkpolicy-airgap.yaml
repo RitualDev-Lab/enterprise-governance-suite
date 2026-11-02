@@ -1,0 +1,56 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "ritual-governance.fullname" . }}-airgap-boundary
+  labels:
+    {{- include "ritual-governance.labels" . | nindent 4 }}
+spec:
+  podSelector: {} # Applies to all pods in the release namespace
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow traffic within the namespace
+    - from:
+        - podSelector: {}
+    # Allow incoming traffic from Kubernetes Ingress controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+  egress:
+    # 1. Allow internal cluster DNS resolution
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # 2. Allow communication within namespace
+    - to:
+        - podSelector: {}
+    # 3. Allow egress to private internal database subnets (RFC 1918)
+    # Explicitly excludes AWS/GCP instance metadata endpoint 169.254.169.254
+    - to:
+        - ipBlock:
+            cidr: 10.0.0.0/8
+        - ipBlock:
+            cidr: 172.16.0.0/12
+        - ipBlock:
+            cidr: 192.168.0.0/16
+{{- if not .Values.global.airGapped }}
+    # 4. In standard mode, allow outbound HTTPS for webhook notifications
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 169.254.169.254/32
+              - 100.100.100.200/32
+      ports:
+        - protocol: TCP
+          port: 443
+{{- end }}

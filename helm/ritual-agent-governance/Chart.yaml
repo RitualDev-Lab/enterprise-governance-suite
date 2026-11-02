@@ -1,0 +1,23 @@
+apiVersion: v2
+name: ritual-agent-governance
+description: Enterprise Umbrella Helm Chart for Ritual Agent Governance Suite (DBShield + AgentShield + SkillPrism)
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - enterprise
+  - ai-agents
+  - guardrails
+  - dbshield
+  - agentshield
+  - skillprism
+  - airgap
+  - soc2
+home: https://github.com/RitualDev-Lab/enterprise-governance-suite
+sources:
+  - https://github.com/RitualDev-Lab/DBShield
+  - https://github.com/RitualDev-Lab/AgentShield
+  - https://github.com/RitualDev-Lab/SkillPrism
+maintainers:
+  - name: RitualDev Lab Enterprise Architecture
+    email: enterprise@ritualdev.com

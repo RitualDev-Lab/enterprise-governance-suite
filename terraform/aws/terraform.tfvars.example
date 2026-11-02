@@ -1,0 +1,5 @@
+aws_region       = "us-east-1"
+environment      = "production"
+vpc_cidr         = "10.100.0.0/16"
+redis_node_type  = "cache.m7g.large"
+redis_auth_token = "replace_with_strong_32char_token_here_abc123"
