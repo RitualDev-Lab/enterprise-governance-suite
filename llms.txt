@@ -1,0 +1,28 @@
+# Ritual Enterprise Agent Governance Suite
+> Private VPC Terraform Modules, Kubernetes Helm Umbrella Chart & Air-Gapped Compliance Suite
+
+The Ritual Enterprise Agent Governance Suite is an infrastructure platform designed for Fortune 500 and regulated enterprises deploying AI coding agents (Claude Code, Cursor, Windsurf, Devin, Antigravity) across large developer fleets.
+
+Website: https://ritualdev.in/enterprise/
+Repository: https://github.com/RitualDev-Lab/enterprise-governance-suite
+Extension: https://open-vsx.org/extension/ritualdev-lab/ritual-agent-defense
+License: MIT
+
+## Infrastructure Stack
+1. **Terraform AWS VPC Module (`terraform/aws/`)**:
+   - Provisions isolated private subnets, security groups, KMS encrypted state, and VPC endpoints.
+   - Restricts metadata service (IMDSv2 hop limit 1) to block SSRF and cloud IAM credential exfiltration.
+2. **Kubernetes Umbrella Helm Chart (`helm/ritual-agent-governance/`)**:
+   - Bundles AgentShield Control Plane, DBShield wire gateway, and SkillPrism Redis VPC cluster.
+   - Enforces strict air-gapped `NetworkPolicy` dropping all unauthorized outbound egress.
+3. **Automated SOC 2 Compliance PDF Generator**:
+   - Compiles immutable cryptographic audit logs, PII masking receipts, and dry-run commit trails into verifiable audit PDFs for compliance auditors.
+
+## Quick Start Deployment
+```bash
+# Deploy via Terraform into AWS VPC
+cd terraform/aws && terraform init && terraform apply
+
+# Deploy via Helm into Kubernetes
+helm install ritual-defense ./helm/ritual-agent-governance --set airgap.enabled=true
+```

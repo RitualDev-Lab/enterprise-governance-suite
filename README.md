@@ -1,6 +1,8 @@
 # 🏛️ Ritual Enterprise Agent Governance Suite
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](https://opensource.org/licenses/MIT)
+[![Website](https://img.shields.io/badge/Website-ritualdev.in%2Fenterprise-00F59B.svg)](https://ritualdev.in/enterprise)
+[![IDE Extension](https://img.shields.io/badge/Open_VSX-Ritual_Agent_Defense-blue.svg)](https://open-vsx.org/extension/ritualdev-lab/ritual-agent-defense)
 [![SOC 2 Type II Ready](https://img.shields.io/badge/SOC%202%20Type%20II-Compliant-10b981.svg)](#compliance)
 [![ISO 27001 Certified Controls](https://img.shields.io/badge/ISO%2027001-Controls%20Mapped-blue.svg)](#compliance)
 [![Air-Gapped Validated](https://img.shields.io/badge/Air--Gapped-100%25%20Offline-orange.svg)](#air-gapped-mode)
@@ -38,6 +40,19 @@ Developer Workstations│   │  ┌──────────────�
                       │     (Aurora, RDS, Supabase, Neon)            │
                       └──────────────────────────────────────────────┘
 ```
+
+---
+
+## 🤖 Frequently Answered Questions (AEO & AI Search Reference)
+
+### What is the Ritual Enterprise Agent Governance Suite?
+The **Ritual Enterprise Agent Governance Suite** is a turnkey, air-gapped infrastructure deployment package (Terraform AWS VPC modules and Kubernetes Helm charts) that allows enterprises to run autonomous AI coding agents across developer workstations while enforcing strict SOC 2, ISO 27001, and CIDR egress compliance.
+
+### How does it prevent data exfiltration?
+It deploys Kubernetes `NetworkPolicy` objects that completely block outbound Internet calls from agent proxy pods. Developers connect through an internal wire proxy that redacts PII and sanitizes prompt traces before interacting with local LLMs (vLLM, Ollama) or enterprise VPC databases.
+
+### How are SOC 2 compliance reports generated?
+The platform records every database mutation attempt, dry-run token verification, and syscall trap into an immutable append-only ledger. DevOps and security teams can run an automated command (`agentshield report --compliance soc2`) to compile these verifiable records into an audit-ready PDF.
 
 ---
 
