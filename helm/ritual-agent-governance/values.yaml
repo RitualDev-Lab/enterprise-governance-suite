@@ -90,6 +90,46 @@ skillprism:
       cpu: 250m
       memory: 512Mi
 
+# ─── 4. Fleet Policy Controller (.ritualrules SSO Sync) ────────────────
+fleetController:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ghcr.io/ritualdev-lab/fleet-controller
+    tag: "3.0.0"
+    pullPolicy: IfNotPresent
+  port: 9443
+  secretName: "ritual-fleet-secrets"
+  sso:
+    provider: "oidc" # oidc | saml2
+    issuer: "https://identity.enterprise.corp/oauth2"
+    clientId: "ritualdev-fleet-controller"
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+
+# ─── 5. OpenTelemetry (OTel) SIEM Fleet Collector ─────────────────────
+otelCollector:
+  enabled: true
+  image:
+    repository: otel/opentelemetry-collector-contrib
+    tag: "0.98.0"
+    pullPolicy: IfNotPresent
+  siemEndpoint: "https://http-intake.logs.datadoghq.com:443"
+  secretName: "ritual-otel-secrets"
+  batchSize: 1000
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 150m
+      memory: 256Mi
+
 # ─── Ingress & Corporate TLS ───────────────────────────────────────────
 ingress:
   enabled: true
@@ -106,6 +146,9 @@ ingress:
         - path: /api/fleet
           service: agentshield-control-plane
           port: 8443
+        - path: /api/rules
+          service: fleet-controller
+          port: 9443
         - path: /api/tools
           service: skillprism-hub
           port: 8080

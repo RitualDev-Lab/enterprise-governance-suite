@@ -1,0 +1,33 @@
+{
+  "name": "@ritualdev/enterprise-governance-suite",
+  "version": "3.0.0",
+  "description": "Enterprise Fleet Governance Suite: Centralized .ritualrules synchronization via corporate SSO (OIDC/SAML) and OpenTelemetry fleet collectors",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "enterprise-governance",
+    "sso",
+    "oidc",
+    "saml",
+    "ritualrules",
+    "opentelemetry",
+    "siem",
+    "agentshield",
+    "dbshield"
+  ],
+  "author": "RitualDev Lab <security@ritualdev.in>",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}

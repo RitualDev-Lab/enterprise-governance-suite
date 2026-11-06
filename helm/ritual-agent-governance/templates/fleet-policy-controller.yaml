@@ -1,0 +1,56 @@
+{{- if .Values.fleetController.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ritual-agent-governance.fullname" . }}-fleet-controller
+  labels:
+    {{- include "ritual-agent-governance.labels" . | nindent 4 }}
+    app.kubernetes.io/component: fleet-controller
+spec:
+  replicas: {{ .Values.fleetController.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "ritual-agent-governance.name" . }}-fleet-controller
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "ritual-agent-governance.name" . }}-fleet-controller
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: fleet-controller
+    spec:
+      containers:
+        - name: fleet-controller
+          image: "{{ .Values.fleetController.image.repository }}:{{ .Values.fleetController.image.tag }}"
+          imagePullPolicy: {{ .Values.fleetController.image.pullPolicy }}
+          ports:
+            - name: https-api
+              containerPort: 9443
+              protocol: TCP
+          env:
+            - name: SSO_ISSUER
+              value: {{ .Values.fleetController.sso.issuer | quote }}
+            - name: SSO_CLIENT_ID
+              value: {{ .Values.fleetController.sso.clientId | quote }}
+            - name: SIGNING_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.fleetController.secretName }}
+                  key: signingSecret
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 9443
+              scheme: HTTPS
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 9443
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.fleetController.resources | nindent 12 }}
+{{- end }}

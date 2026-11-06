@@ -1,0 +1,55 @@
+{{- if .Values.otelCollector.enabled }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "ritual-agent-governance.fullname" . }}-otel-collector
+  labels:
+    {{- include "ritual-agent-governance.labels" . | nindent 4 }}
+    app.kubernetes.io/component: otel-collector
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "ritual-agent-governance.name" . }}-otel-collector
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "ritual-agent-governance.name" . }}-otel-collector
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: otel-collector
+    spec:
+      containers:
+        - name: otel-collector
+          image: "{{ .Values.otelCollector.image.repository }}:{{ .Values.otelCollector.image.tag }}"
+          imagePullPolicy: {{ .Values.otelCollector.image.pullPolicy }}
+          command:
+            - "/otelcol-contrib"
+            - "--config=/etc/otelcol/config.yaml"
+          ports:
+            - name: otlp-grpc
+              containerPort: 4317
+              protocol: TCP
+            - name: otlp-http
+              containerPort: 4318
+              protocol: TCP
+            - name: metrics
+              containerPort: 8889
+              protocol: TCP
+          env:
+            - name: SIEM_ENDPOINT
+              value: {{ .Values.otelCollector.siemEndpoint | quote }}
+            - name: SIEM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.otelCollector.secretName }}
+                  key: apiKey
+          resources:
+            {{- toYaml .Values.otelCollector.resources | nindent 12 }}
+          volumeMounts:
+            - name: otel-config
+              mountPath: /etc/otelcol
+      volumes:
+        - name: otel-config
+          configMap:
+            name: {{ include "ritual-agent-governance.fullname" . }}-otel-config
+{{- end }}
