@@ -13,3 +13,5 @@ terraform.rc
 airgap-bundle-*/
 *.tar.gz
 .DS_Store
+node_modules/
+dist/
