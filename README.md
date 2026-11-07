@@ -1,8 +1,9 @@
-# 🏛️ Ritual Enterprise Agent Governance Suite
+﻿# 🏛️ Ritual Enterprise Agent Governance Suite
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](https://opensource.org/licenses/MIT)
 [![Website](https://img.shields.io/badge/Website-ritualdev.in%2Fenterprise-00F59B.svg)](https://ritualdev.in/enterprise)
 [![IDE Extension](https://img.shields.io/badge/Open_VSX-Ritual_Agent_Defense-blue.svg)](https://open-vsx.org/extension/ritualdev-lab/ritual-agent-defense)
+[![Sponsor on Dodo Payments](https://img.shields.io/badge/Sponsor-Dodo%20Payments-8b5cf6?style=flat-square&logo=shield&logoColor=white)](https://checkout.dodopayments.com/buy/pdt_0NpjONGugY5QkrFDUaPva)
 [![SOC 2 Type II Ready](https://img.shields.io/badge/SOC%202%20Type%20II-Compliant-10b981.svg)](#compliance)
 [![ISO 27001 Certified Controls](https://img.shields.io/badge/ISO%2027001-Controls%20Mapped-blue.svg)](#compliance)
 [![Air-Gapped Validated](https://img.shields.io/badge/Air--Gapped-100%25%20Offline-orange.svg)](#air-gapped-mode)
@@ -106,6 +107,26 @@ helm upgrade --install ritual-governance ./helm/ritual-agent-governance \
   - `A.18`: Compliance with privacy and regulatory mandates.
 
 ---
+
+---
+
+## 💖 Sponsor & Support via Dodo Payments
+
+Enterprise Governance Suite is engineered by RitualDev Lab. Your sponsorship directly finances our Terraform VPC testing rigs, Kubernetes Helm validation runners, and air-gapped security compliance test suites.
+
+<div align="center">
+
+[![Sponsor on Dodo Payments](https://img.shields.io/badge/Sponsor_via_Dodo-Payments-8b5cf6?style=for-the-badge&logo=shield&logoColor=white)](https://checkout.dodopayments.com/buy/pdt_0NpjONGugY5QkrFDUaPva)
+[![Interactive Donation Portal](https://img.shields.io/badge/Donation_Portal-Cards%20%7C%20UPI%20%7C%20Apple%20Pay-ff5964?style=for-the-badge&logo=heart&logoColor=white)](https://ritualdev.in/donate)
+[![GitHub Sponsors](https://img.shields.io/badge/GitHub_Sponsors-RitualDev--Lab-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/RitualDev-Lab)
+
+<br/>
+
+[**⚡ 1-Click Dodo Payments Checkout**](https://checkout.dodopayments.com/buy/pdt_0NpjONGugY5QkrFDUaPva) &nbsp;•&nbsp; [**🎁 Interactive Donation Form (USD & INR UPI)**](https://ritualdev.in/donate) &nbsp;•&nbsp; [**❤️ GitHub Sponsors**](https://github.com/sponsors/RitualDev-Lab)
+
+<sub>🔒 *Zero physical shipping required. Powered by Dodo Payments (Merchant of Record) with instant tax invoice and global payment methods (Cards, UPI, Apple Pay).*</sub>
+
+</div>
 
 ## 📄 License & Commercial Support
 
