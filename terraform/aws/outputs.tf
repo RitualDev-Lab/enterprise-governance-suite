@@ -22,3 +22,16 @@ output "configure_kubeconfig_cmd" {
   description = "Command to authenticate local kubectl with the new cluster"
   value       = "aws eks --region ${var.aws_region} update-kubeconfig --name ${aws_eks_cluster.ritual.name}"
 }
+
+output "airgap_isolated_subnet_ids" {
+  description = "IDs of the air-gapped zero-egress isolated subnets"
+  value       = aws_subnet.airgap_isolated[*].id
+}
+
+output "privatelink_endpoint_dns" {
+  description = "DNS entries for AWS PrivateLink VPC interface endpoints"
+  value = {
+    for k, v in aws_vpc_endpoint.interface_endpoints : k => v.dns_entry[0].dns_name
+  }
+}
+

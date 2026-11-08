@@ -6,3 +6,5 @@ export * from './siem-forwarders';
 export * from './scim-directory';
 export * from './compliance-pack';
 export * from './sla-automation';
+export * from './approval-webhooks';
+
