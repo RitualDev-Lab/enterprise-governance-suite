@@ -240,3 +240,95 @@ resource "aws_eks_cluster" "ritual" {
 
   depends_on = [aws_iam_role_policy_attachment.eks_cluster_policy]
 }
+
+# ─── 6. Hardened EKS Managed Node Group with IMDSv2 Metadata Boundary ───
+resource "aws_iam_role" "eks_nodes" {
+  name = "${var.environment}-ritual-eks-node-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "eks_worker_node_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+  role       = aws_iam_role.eks_nodes.name
+}
+
+resource "aws_iam_role_policy_attachment" "eks_cni_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+  role       = aws_iam_role.eks_nodes.name
+}
+
+resource "aws_iam_role_policy_attachment" "eks_container_registry" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  role       = aws_iam_role.eks_nodes.name
+}
+
+resource "aws_launch_template" "eks_hardened_nodes" {
+  name_prefix   = "${var.environment}-ritual-hardened-node-"
+  instance_type = "m7i.xlarge"
+
+  # Enforce IMDSv2 with hop limit 1 to block container SSRF credential exfiltration
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 1
+    instance_metadata_tags      = "disabled"
+  }
+
+  vpc_security_group_ids = [aws_security_group.agent_core.id]
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name        = "${var.environment}-ritual-governance-worker"
+      Compliance  = "SOC2-CC6.1-IMDSv2"
+      Environment = var.environment
+    }
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_eks_node_group" "governance_workers" {
+  cluster_name    = aws_eks_cluster.ritual.name
+  node_group_name = "${var.environment}-governance-workers"
+  node_role_arn   = aws_iam_role.eks_nodes.arn
+  subnet_ids      = aws_subnet.private[*].id
+
+  launch_template {
+    id      = aws_launch_template.eks_hardened_nodes.id
+    version = "$Latest"
+  }
+
+  scaling_config {
+    desired_size = 3
+    max_size     = 10
+    min_size     = 2
+  }
+
+  update_config {
+    max_unavailable = 1
+  }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.eks_worker_node_policy,
+    aws_iam_role_policy_attachment.eks_cni_policy,
+    aws_iam_role_policy_attachment.eks_container_registry,
+  ]
+
+  tags = {
+    Environment = var.environment
+    Component   = "RitualAgentGovernanceMesh"
+  }
+}
