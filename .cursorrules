@@ -1,0 +1,4 @@
+# Cursor AI Rules for Enterprise Governance Suite
+- Always maintain zero-trust, air-gapped infrastructure defaults.
+- Enforce IMDSv2 with hop limit 1 on all AWS EC2/ECS/EKS instances to prevent cloud IAM SSRF exfiltration.
+- NetworkPolicy must explicitly drop unauthorized egress by default.
