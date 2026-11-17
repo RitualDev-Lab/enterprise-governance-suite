@@ -79,10 +79,28 @@ terraform init
 terraform apply
 ```
 
-### Option 2: Kubernetes Umbrella Helm Chart
+### Option 2: Terraform on Google Cloud (Air-Gapped GKE + VPC-SC + CMEK)
 
 ```bash
-# 1. Add your enterprise values
+cd terraform/gcp
+cp terraform.tfvars.example terraform.tfvars
+terraform init
+terraform apply
+```
+
+### Option 3: Terraform on Azure (Private VNet + AKS + Key Vault)
+
+```bash
+cd terraform/azure
+cp terraform.tfvars.example terraform.tfvars
+terraform init
+terraform apply
+```
+
+### Option 4: Consolidated Kubernetes Umbrella Helm Chart
+
+```bash
+# Deploy the full Ritual Governance Suite (DBShield + AgentShield + SkillPrism + Poly Cloud API)
 helm upgrade --install ritual-governance ./helm/ritual-agent-governance \
   --namespace ritual-system \
   --create-namespace \

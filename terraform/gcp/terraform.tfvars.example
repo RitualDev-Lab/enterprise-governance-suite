@@ -1,0 +1,12 @@
+project_id         = "my-enterprise-ritual-prod"
+region             = "us-central1"
+environment        = "production"
+network_name       = "ritual-governance-vpc"
+vpc_cidr           = "10.240.0.0/20"
+pods_cidr          = "10.241.0.0/16"
+services_cidr      = "10.242.0.0/20"
+master_ipv4_cidr_block = "172.16.0.0/28"
+air_gapped         = true
+node_machine_type  = "e2-standard-4"
+min_node_count     = 1
+max_node_count     = 5

@@ -18,6 +18,16 @@ sources:
   - https://github.com/RitualDev-Lab/DBShield
   - https://github.com/RitualDev-Lab/AgentShield
   - https://github.com/RitualDev-Lab/SkillPrism
+  - https://github.com/RitualDev-Lab/poly-cloud-api
+dependencies:
+  - name: agentshield
+    version: "1.0.0"
+    repository: "file://../agentshield"
+    condition: agentshield.enabled
+  - name: poly-cloud-api
+    version: "0.1.0"
+    repository: "file://../poly-cloud-api"
+    condition: polyCloudApi.enabled
 maintainers:
   - name: RitualDev Lab Enterprise Architecture
     email: enterprise@ritualdev.com

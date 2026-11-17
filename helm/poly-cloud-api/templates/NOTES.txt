@@ -1,0 +1,33 @@
+================================================================================
+☁️  Poly Cloud API has been successfully deployed to Kubernetes!
+================================================================================
+
+1. Retrieve Master Cluster Admin Token:
+{{- if .Values.config.existingAdminTokenSecret }}
+   kubectl get secret --namespace {{ .Release.Namespace }} {{ .Values.config.existingAdminTokenSecret }} -o jsonpath="{.data.{{ .Values.config.adminTokenSecretKey | default "admin-token" }}}" | base64 --decode
+{{- else }}
+   kubectl get secret --namespace {{ .Release.Namespace }} {{ include "poly-cloud-api.fullname" . }}-secrets -o jsonpath="{.data.DEFAULT_ADMIN_TOKEN}" | base64 --decode
+{{- end }}
+
+2. Access the Application:
+{{- if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
+   Web Dashboard: https://{{ $host.host }}/dashboard
+   Health Probe:  https://{{ $host.host }}/api/v1/health
+   Prometheus:    https://{{ $host.host }}/api/v1/metrics
+{{- end }}
+{{- else if contains "NodePort" .Values.service.type }}
+   export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "poly-cloud-api.fullname" . }})
+   export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+   echo "http://$NODE_IP:$NODE_PORT/dashboard"
+{{- else if contains "LoadBalancer" .Values.service.type }}
+   NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+   kubectl get svc --namespace {{ .Release.Namespace }} {{ include "poly-cloud-api.fullname" . }} -w
+{{- else if contains "ClusterIP" .Values.service.type }}
+   kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "poly-cloud-api.fullname" . }} 8080:{{ .Values.service.port }}
+   echo "Dashboard available at: http://127.0.0.1:8080/dashboard"
+{{- end }}
+
+3. Connect Poly CLI:
+   poly login --url https://{{ (index .Values.ingress.hosts 0).host }} --token <TOKEN> --workspace default
+   poly cache status

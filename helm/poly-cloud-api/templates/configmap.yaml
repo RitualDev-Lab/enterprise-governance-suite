@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "poly-cloud-api.fullname" . }}-config
+  labels:
+    {{- include "poly-cloud-api.labels" . | nindent 4 }}
+data:
+  HOST: "0.0.0.0"
+  PORT: {{ .Values.service.port | quote }}
+  STORAGE_BACKEND: {{ .Values.config.storageBackend | quote }}
+  STORAGE_LOCAL_DIR: "{{ .Values.persistence.mountPath }}/artifacts"
+  METADATA_DB_PATH: "{{ .Values.persistence.mountPath }}/metadata.sqlite"
+  DEFAULT_WORKSPACE: {{ .Values.config.defaultWorkspace | quote }}
+  AUTH_ENABLED: {{ .Values.config.authEnabled | quote }}
+  MAX_ARTIFACT_SIZE_BYTES: {{ .Values.config.maxArtifactSizeBytes | quote }}
+  COMPUTE_COST_PER_HOUR_USD: {{ .Values.config.computeCostPerHourUsd | quote }}
+
+  # S3 / Object Storage
+  S3_BUCKET: {{ .Values.config.s3.bucket | quote }}
+  S3_REGION: {{ .Values.config.s3.region | quote }}
+  S3_ENDPOINT: {{ .Values.config.s3.endpoint | quote }}
+  S3_FORCE_PATH_STYLE: {{ .Values.config.s3.forcePathStyle | quote }}
+
+  # Direct Presigned URLs
+  PRESIGNED_URLS_ENABLED: {{ .Values.config.presignedUrls.enabled | quote }}
+  PRESIGNED_EXPIRY_SECONDS: {{ .Values.config.presignedUrls.expirySeconds | quote }}
+  PRESIGNED_REDIRECT_ON_GET: {{ .Values.config.presignedUrls.redirectOnGet | quote }}
+
+  # Attestation & SLSA Verification
+  ATTESTATION_REQUIRED: {{ .Values.config.attestation.required | quote }}
+  ATTESTATION_ALLOWED_RUNNERS: {{ .Values.config.attestation.allowedRunners | quote }}
+  ATTESTATION_ALLOWED_ARCHS: {{ .Values.config.attestation.allowedArchs | quote }}
+  ATTESTATION_ALLOWED_PLATFORMS: {{ .Values.config.attestation.allowedPlatforms | quote }}
+  CHECKSUM_VERIFICATION_ENABLED: {{ .Values.config.attestation.checksumVerification | quote }}
+
+  # GitHub Actions OIDC Auth
+  GITHUB_OIDC_ENABLED: {{ .Values.config.oidc.enabled | quote }}
+  GITHUB_OIDC_AUDIENCE: {{ .Values.config.oidc.audience | quote }}
+  GITHUB_OIDC_ALLOWED_OWNERS: {{ .Values.config.oidc.allowedOwners | quote }}
+  GITHUB_OIDC_ALLOWED_REPOS: {{ .Values.config.oidc.allowedRepositories | quote }}
+  GITHUB_OIDC_WRITE_BRANCHES: {{ .Values.config.oidc.writeBranches | quote }}
+  GITHUB_OIDC_ALLOW_PR_WRITE: {{ .Values.config.oidc.allowPrWrite | quote }}
+  GITHUB_OIDC_TOKEN_TTL: {{ .Values.config.oidc.tokenTtlSeconds | quote }}
+
+  # Storage Optimizer & LRU Auto-Eviction
+  AUTO_EVICTION_ENABLED: {{ .Values.config.optimizer.autoEvictionEnabled | quote }}
+  AUTO_EVICTION_INTERVAL_SECONDS: {{ .Values.config.optimizer.autoEvictIntervalSeconds | quote }}
+  AUTO_EVICT_ON_WRITE: {{ .Values.config.optimizer.autoEvictOnWrite | quote }}
+  QUOTA_HIGH_WATERMARK_RATIO: {{ .Values.config.optimizer.quotaHighWatermarkRatio | quote }}
+  QUOTA_LOW_WATERMARK_RATIO: {{ .Values.config.optimizer.quotaLowWatermarkRatio | quote }}
+  DEDUPLICATION_ENABLED: {{ .Values.config.optimizer.deduplicationEnabled | quote }}

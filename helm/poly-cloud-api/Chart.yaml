@@ -1,0 +1,30 @@
+apiVersion: v2
+name: poly-cloud-api
+description: Production Kubernetes Helm Chart for Poly Cloud API (Enterprise Remote Cache & ROI Analytics Server)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+home: https://github.com/RitualDev-Lab/poly-cloud-api
+sources:
+  - https://github.com/RitualDev-Lab/poly-cloud-api
+  - https://github.com/RitualDev-Lab/poly
+maintainers:
+  - name: RitualDev Lab
+    email: developer@ritualdev.in
+    url: https://github.com/RitualDev-Lab
+keywords:
+  - remote-cache
+  - poly
+  - turborepo
+  - monorepo
+  - kubernetes
+  - enterprise
+  - s3
+  - r2
+  - minio
+  - slsa
+  - in-toto
+annotations:
+  artifacthub.io/license: Apache-2.0
+  artifacthub.io/category: developer-tools
+  artifacthub.io/prerelease: "false"
