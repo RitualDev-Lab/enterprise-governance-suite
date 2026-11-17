@@ -131,3 +131,12 @@ Enterprise Governance Suite is engineered by RitualDev Lab. Your sponsorship dir
 ## 📄 License & Commercial Support
 
 Licensed under the MIT License for open-source evaluation. Commercial enterprise support, forward-deployed engineering, custom AST rules, and 99.99% SLAs are available via the **Ritual Enterprise Governance Contract**. Contact: `enterprise@ritualdev.com`.
+
+---
+
+## 🛡️ Community & Governance
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Contributing Guidelines](CONTRIBUTING.md)
+- [Security Policy](SECURITY.md)
+- [Accessibility Statement](ACCESSIBILITY.md)
+- [License](LICENSE)
