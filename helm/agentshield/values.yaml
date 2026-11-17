@@ -1,0 +1,146 @@
+# Default values for agentshield.
+replicaCount: 3
+
+image:
+  repository: ghcr.io/ritualdev-lab/agentshield
+  pullPolicy: IfNotPresent
+  tag: "0.2.1"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  name: "agentshield-sa"
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  fsGroup: 10001
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+# Enterprise Air-Gapped Confinement Controls
+airGapped:
+  enabled: true
+  blockAllPublicInternetEgress: true
+  allowedCidrs:
+    - 10.0.0.0/8
+    - 172.16.0.0/12
+    - 192.168.0.0/16
+
+# Secret Redaction Engine Configuration
+engine:
+  strictMode: true
+  entropyThreshold: 4.5
+  maskStyle: "token"
+  auditSecret: "enterprise-salt-change-in-production"
+
+# SIEM & Telemetry Forwarding Endpoints
+siem:
+  enabled: false
+  format: "cef" # cef, syslog, json
+  datadog:
+    enabled: false
+    apiKey: ""
+    site: "datadoghq.com"
+  splunk:
+    enabled: false
+    hecUrl: ""
+    token: ""
+
+service:
+  type: ClusterIP
+  port: 3000
+  targetPort: 3000
+
+ingress:
+  enabled: false
+  className: "nginx"
+  hosts:
+    - host: agentshield.internal.corp
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+
+resources:
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 75
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Host DaemonSet Orchestration (agentshieldd)
+daemonset:
+  enabled: true
+  image:
+    repository: ghcr.io/ritualdev-lab/agentshield
+    tag: "0.2.1"
+    pullPolicy: IfNotPresent
+  hostSocketPath: "/var/run/agentshield.sock"
+  authToken: "sec_ritual_daemon_token_prod_9918"
+  maxClients: 250
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# High-Availability DBShield Database Wire Proxy
+dbshield:
+  enabled: true
+  replicaCount: 3
+  image:
+    repository: ghcr.io/ritualdev-lab/dbshield
+    tag: "0.2.1"
+    pullPolicy: IfNotPresent
+  safetyTier: "STRICT"
+  raftPeers: "dbshield-0.dbshield,dbshield-1.dbshield,dbshield-2.dbshield"
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+# SkillPrism Shared VPC Hub & Redis Context Cache
+skillprism:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ghcr.io/ritualdev-lab/skillprism
+    tag: "0.2.1"
+    pullPolicy: IfNotPresent
+  redisUrl: "redis://skillprism-redis.internal.corp:6379"
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1.5Gi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+

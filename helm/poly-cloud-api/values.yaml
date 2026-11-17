@@ -1,0 +1,206 @@
+# Default values for poly-cloud-api.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 2
+
+image:
+  repository: ghcr.io/ritualdev-lab/poly-cloud-api
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account (e.g. AWS IRSA eks.amazonaws.com/role-arn)
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/proxy-body-size: "2048m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+  hosts:
+    - host: cache.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: poly-cloud-tls
+      hosts:
+        - cache.example.com
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 75
+  targetMemoryUtilizationPercentage: 80
+
+# Prometheus Operator ServiceMonitor
+serviceMonitor:
+  enabled: true
+  interval: 15s
+  scrapeTimeout: 10s
+  path: /api/v1/metrics
+  labels:
+    release: prometheus
+
+# Application Configuration
+config:
+  # Storage Backend: "s3", "local", or "memory"
+  storageBackend: "s3"
+
+  # S3 / Cloudflare R2 / MinIO Object Storage Configuration
+  s3:
+    bucket: "poly-remote-cache"
+    region: "us-east-1"
+    # Custom endpoint URL:
+    # - Cloudflare R2: https://<account_id>.r2.cloudflarestorage.com
+    # - MinIO: http://minio.minio.svc.cluster.local:9000
+    # - AWS S3: leave empty
+    endpoint: ""
+    forcePathStyle: false
+    # Existing Kubernetes Secret containing AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+    existingSecret: ""
+    # Inline credentials (if existingSecret is empty)
+    accessKeyId: ""
+    secretAccessKey: ""
+
+  # Direct-to-Storage Presigned S3/R2 URLs
+  presignedUrls:
+    enabled: true
+    expirySeconds: 900
+    redirectOnGet: true
+
+  # Cryptographic Attestation & SLSA Verification
+  attestation:
+    required: false
+    trustedKeys: ""
+    allowedRunners: ""
+    allowedArchs: ""
+    allowedPlatforms: ""
+    checksumVerification: true
+
+  # GitHub Actions OIDC Zero-Secret Authentication
+  oidc:
+    enabled: true
+    audience: ""
+    allowedOwners: ""
+    allowedRepositories: ""
+    writeBranches: ""
+    allowPrWrite: true
+    tokenTtlSeconds: 3600
+
+  # Intelligent LRU Auto-Eviction Daemon & Deduplication
+  optimizer:
+    autoEvictionEnabled: true
+    autoEvictIntervalSeconds: 300
+    autoEvictOnWrite: true
+    quotaHighWatermarkRatio: 0.95
+    quotaLowWatermarkRatio: 0.80
+    deduplicationEnabled: true
+
+  # General Server Settings
+  maxArtifactSizeBytes: 2147483648 # 2GB
+  computeCostPerHourUsd: 0.08
+  defaultWorkspace: "default"
+  authEnabled: true
+
+  # Master Cluster Admin Token
+  # If empty, an auto-generated secret will be mounted
+  defaultAdminToken: ""
+  existingAdminTokenSecret: ""
+  adminTokenSecretKey: "admin-token"
+
+# Persistent Volume Claim for Local Disk Storage or SQLite DB
+persistence:
+  enabled: false
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 50Gi
+  mountPath: /app/data
+
+# Probes for Zero-Downtime Rolling Updates
+livenessProbe:
+  httpGet:
+    path: /api/v1/health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /api/v1/health
+    port: http
+  initialDelaySeconds: 2
+  periodSeconds: 5
+  timeoutSeconds: 2
+  failureThreshold: 2
+
+startupProbe:
+  httpGet:
+    path: /api/v1/health
+    port: http
+  initialDelaySeconds: 1
+  periodSeconds: 3
+  timeoutSeconds: 2
+  failureThreshold: 10
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - poly-cloud-api
+          topologyKey: kubernetes.io/hostname
