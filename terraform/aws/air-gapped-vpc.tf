@@ -78,7 +78,7 @@ locals {
 }
 
 resource "aws_vpc_endpoint" "interface_endpoints" {
-  for_each = var.enable_air_gapped_privatelink ? toset(locals.privatelink_services) : []
+  for_each = var.enable_air_gapped_privatelink ? toset(local.privatelink_services) : toset([])
 
   vpc_id              = aws_vpc.ritual_vpc.id
   service_name        = "com.amazonaws.${var.aws_region}.${each.value}"

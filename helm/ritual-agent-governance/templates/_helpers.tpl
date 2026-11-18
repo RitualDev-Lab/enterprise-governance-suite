@@ -29,3 +29,15 @@ helm.sh/chart: {{ include "ritual-governance.name" . }}-{{ .Chart.Version | repl
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 enterprise.ritualdev.com/suite: "governance"
 {{- end }}
+
+{{- define "ritual-agent-governance.name" -}}
+{{- include "ritual-governance.name" . }}
+{{- end }}
+
+{{- define "ritual-agent-governance.fullname" -}}
+{{- include "ritual-governance.fullname" . }}
+{{- end }}
+
+{{- define "ritual-agent-governance.labels" -}}
+{{- include "ritual-governance.labels" . }}
+{{- end }}

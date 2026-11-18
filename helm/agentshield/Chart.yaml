@@ -2,8 +2,8 @@ apiVersion: v2
 name: agentshield
 description: Production Kubernetes Helm Chart for AgentShield Zero-Leak Secret Defense & Kernel Sandbox (Air-Gapped Private VPC)
 type: application
-version: 1.0.0
-appVersion: "0.2.1"
+version: 1.1.0
+appVersion: "0.2.2"
 home: https://ritualdev.in/enterprise
 sources:
   - https://github.com/RitualDev-Lab/AgentShield
