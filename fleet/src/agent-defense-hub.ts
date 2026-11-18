@@ -269,7 +269,7 @@ export class AgentDefenseHubServer {
     const method = req.method || 'GET';
     const url = (req.url || '/').split('?')[0];
 
-    if (url === '/healthz' || url === '/readyz') {
+    if (url === '/health' || url === '/healthz' || url === '/readyz') {
       this.sendJson(res, 200, {
         status: 'ok',
         service: 'agent-defense-hub',

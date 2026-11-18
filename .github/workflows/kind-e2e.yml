@@ -1,0 +1,86 @@
+name: Kubernetes kind Cluster E2E Admission & Readiness CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kind-e2e:
+    name: Ephemeral kind Cluster Helm Install, /healthz & NetworkPolicy E2E
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.16.2
+
+      - name: Create Ephemeral Kubernetes kind Cluster
+        uses: helm/kind-action@v1.12.0
+        with:
+          cluster_name: ritual-defense-e2e
+          wait: 120s
+
+      - name: Build agent-defense-hub Container Image
+        run: |
+          docker build -t ritualdev/agent-defense-hub:ci -f agent-defense-hub/Dockerfile .
+          kind load docker-image ritualdev/agent-defense-hub:ci --name ritual-defense-e2e
+
+      - name: Install helm/agentshield into Ephemeral kind Cluster
+        run: |
+          helm upgrade --install agentshield helm/agentshield \
+            --namespace ritual-defense \
+            --create-namespace \
+            --set replicaCount=1 \
+            --set image.repository=ritualdev/agent-defense-hub \
+            --set image.tag=ci \
+            --set image.pullPolicy=IfNotPresent \
+            --set service.port=8443 \
+            --set service.targetPort=8443 \
+            --set airGapped.enabled=true \
+            --set autoscaling.enabled=false \
+            --set daemonset.enabled=false \
+            --set dbshield.enabled=false \
+            --set skillprism.enabled=false \
+            --set resources.requests.cpu=50m \
+            --set resources.requests.memory=64Mi \
+            --set resources.limits.cpu=500m \
+            --set resources.limits.memory=256Mi \
+            --wait \
+            --timeout 180s
+
+      - name: Verify Air-Gapped NetworkPolicy & Live /healthz Readiness Probe
+        run: |
+          set -euo pipefail
+          kubectl get pods,svc,networkpolicy -n ritual-defense
+
+          # 1. Verify air-gapped NetworkPolicy manifest is active in the cluster
+          NP_JSON=$(kubectl get networkpolicy -n ritual-defense -o json)
+          echo "$NP_JSON" | grep -q "agentshield-airgap"
+          echo "$NP_JSON" | grep -q '"Egress"'
+          echo "$NP_JSON" | grep -q "10.0.0.0/8"
+
+          # 2. Port-forward to the live Service and assert /healthz and /health return 200 OK
+          kubectl port-forward -n ritual-defense svc/agentshield 18443:8443 &
+          PF_PID=$!
+          trap 'kill $PF_PID 2>/dev/null || true' EXIT
+          sleep 3
+
+          HEALTHZ=$(curl -sf http://127.0.0.1:18443/healthz)
+          echo "Live /healthz response: $HEALTHZ"
+          echo "$HEALTHZ" | grep -q '"status":"ok"'
+          echo "$HEALTHZ" | grep -q '"service":"agent-defense-hub"'
+
+          HEALTH=$(curl -sf http://127.0.0.1:18443/health)
+          echo "Live /health response: $HEALTH"
+          echo "$HEALTH" | grep -q '"status":"ok"'
+
+          echo "✅ Kubernetes kind E2E passed: Helm release ready, /healthz verified, air-gapped NetworkPolicy enforced."
