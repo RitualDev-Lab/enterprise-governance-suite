@@ -1,5 +1,5 @@
 {
-  "name": "@ritualdev/enterprise-governance-suite",
+  "name": "@ritualdev-lab/enterprise-governance-suite",
   "version": "3.0.0",
   "description": "Enterprise Fleet Governance Suite: Centralized .ritualrules synchronization via corporate SSO (OIDC/SAML) and OpenTelemetry fleet collectors",
   "type": "module",

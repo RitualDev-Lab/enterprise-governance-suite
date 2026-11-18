@@ -1,0 +1,25 @@
+services:
+  agent-defense-hub:
+    build:
+      context: ..
+      dockerfile: agent-defense-hub/Dockerfile
+    container_name: ritual-agent-defense-hub
+    ports:
+      - "8443:8443"
+    environment:
+      HUB_HOST: "0.0.0.0"
+      HUB_PORT: "8443"
+      SKILLPRISM_REDIS_MASTER: "redis:6379"
+      SKILLPRISM_AZ: "az-1"
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: ritual-skillprism-redis
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    restart: unless-stopped
