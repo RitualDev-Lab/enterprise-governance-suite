@@ -2,8 +2,8 @@
 FROM node:22-alpine AS builder
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml tsconfig.json ./
-RUN corepack enable && pnpm install --frozen-lockfile=false
+COPY package.json tsconfig.json ./
+RUN npm install --ignore-scripts --no-audit --no-fund
 COPY fleet ./fleet
 RUN npx tsc --outDir dist --module commonjs --moduleResolution node --target ES2022 --esModuleInterop --skipLibCheck fleet/src/*.ts
 
@@ -16,7 +16,7 @@ LABEL org.opencontainers.image.licenses="Apache-2.0"
 RUN addgroup -g 10001 ritual && adduser -u 10001 -G ritual -D -H ritual
 WORKDIR /app
 COPY --from=builder --chown=10001:10001 /app/dist ./dist
-COPY --from=builder --chown=10001:10001 /app/package.json ./package.json
+RUN printf '{"name":"agent-defense-hub","version":"3.0.0","type":"commonjs"}\n' > /app/package.json && chown 10001:10001 /app/package.json
 
 USER 10001:10001
 ENV NODE_ENV=production \
