@@ -58,6 +58,10 @@ jobs:
       - name: Lint & Validate All Helm Charts
         run: |
           for chart in helm/agentshield helm/ritual-agent-governance helm/poly-cloud-api; do
+            echo "=== Preparing $chart ==="
+            if grep -q "^dependencies:" "$chart/Chart.yaml"; then
+              helm dependency update "$chart"
+            fi
             echo "=== Linting $chart ==="
             helm lint "$chart"
             echo "=== Kubeconform validating $chart ==="
