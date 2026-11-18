@@ -16,7 +16,7 @@ LABEL org.opencontainers.image.licenses="Apache-2.0"
 RUN addgroup -g 10001 ritual && adduser -u 10001 -G ritual -D -H ritual
 WORKDIR /app
 COPY --from=builder --chown=10001:10001 /app/dist ./dist
-COPY --from=builder --chown=10001:10001 /app/package.json ./package.json
+RUN printf '{"name":"agent-defense-hub","version":"3.0.0","type":"commonjs"}\n' > /app/package.json && chown 10001:10001 /app/package.json
 
 USER 10001:10001
 ENV NODE_ENV=production \

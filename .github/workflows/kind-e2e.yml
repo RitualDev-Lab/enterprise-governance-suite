@@ -55,7 +55,7 @@ jobs:
             --set resources.limits.cpu=500m \
             --set resources.limits.memory=256Mi \
             --wait \
-            --timeout 180s
+            --timeout 90s || (kubectl describe pods -n ritual-defense && kubectl logs -n ritual-defense -l app.kubernetes.io/name=agentshield --all-containers=true && exit 1)
 
       - name: Verify Air-Gapped NetworkPolicy & Live /healthz Readiness Probe
         run: |
