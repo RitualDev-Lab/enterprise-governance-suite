@@ -16,8 +16,18 @@
     "opentelemetry",
     "siem",
     "agentshield",
-    "dbshield"
+    "dbshield",
+    "ai-agent-security",
+    "mcp-governance"
   ],
+  "homepage": "https://ritualdev.in/enterprise",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RitualDev-Lab/enterprise-governance-suite.git"
+  },
+  "bugs": {
+    "url": "https://github.com/RitualDev-Lab/enterprise-governance-suite/issues"
+  },
   "author": "RitualDev Lab <security@ritualdev.in>",
   "license": "Apache-2.0",
   "devDependencies": {
